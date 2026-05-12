@@ -26,10 +26,11 @@ function draw() {
   push();
   translate(width / 2, height / 2);
   scale(-1, 1);
-  image(capture, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
   
   // 確保攝影機影像已經有寬高後才進行繪製
   if (capture.width > 0 && capture.height > 0) {
+    image(capture, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+    
     fill(255, 255, 0); // 黃色耳環
     noStroke();
     let circleSize = imgWidth * 0.015; // 圓圈大小 (自適應縮放)
@@ -57,6 +58,14 @@ function draw() {
         }
       }
     }
+  } else {
+    // 如果找不到攝影機或還在載入中，顯示提示文字
+    push();
+    scale(-1, 1); // 將 X 軸翻轉回來，讓文字正常顯示
+    fill(100);
+    textAlign(CENTER, CENTER);
+    text("尚未讀取到攝影機畫面", 0, 0);
+    pop();
   }
   pop();
   
