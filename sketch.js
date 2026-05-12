@@ -3,14 +3,23 @@ let faceMesh;
 let faces = [];
 
 function preload() {
-  faceMesh = ml5.faceMesh();
+  // 加入保護機制：檢查 ml5 是否成功從網路載入
+  if (typeof ml5 !== 'undefined') {
+    faceMesh = ml5.faceMesh();
+  } else {
+    console.error("無法載入 ml5.js，請檢查網路連線或 script 標籤。");
+  }
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  capture = createCapture(VIDEO);
+  // 設定攝影機，並在攝影機畫面成功讀取後，才啟動臉部辨識
+  capture = createCapture(VIDEO, function() {
+    if (faceMesh) {
+      faceMesh.detectStart(capture, gotFaces);
+    }
+  });
   capture.hide();
-  faceMesh.detectStart(capture, gotFaces);
 }
 
 function gotFaces(results) {
@@ -27,8 +36,8 @@ function draw() {
   translate(width / 2, height / 2);
   scale(-1, 1);
   
-  // 確保攝影機影像已經有寬高後才進行繪製
-  if (capture.width > 0 && capture.height > 0) {
+  // 確保攝影機影像已經成功載入且有寬高後才進行繪製 (加入 loadedmetadata 判斷)
+  if (capture && capture.loadedmetadata && capture.width > 0 && capture.height > 0) {
     image(capture, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
     
     fill(255, 255, 0); // 黃色耳環
@@ -64,7 +73,7 @@ function draw() {
     scale(-1, 1); // 將 X 軸翻轉回來，讓文字正常顯示
     fill(100);
     textAlign(CENTER, CENTER);
-    text("尚未讀取到攝影機畫面", 0, 0);
+    text("尚未讀取到攝影機畫面，或您的裝置沒有攝影機", 0, 0);
     pop();
   }
   pop();
